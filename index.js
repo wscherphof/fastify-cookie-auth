@@ -6,12 +6,6 @@ const fp = require('fastify-plugin')
 // to export the decorators to the outer scope
 
 async function plugin(fastify, opts) {
-  if (!fastify.httpErrors) {
-    fastify.register(require('fastify-sensible'))
-  }
-  if (!fastify.cookies) {
-    fastify.register(require('fastify-cookie'))
-  }
 
   function auth(method, enforce) {
     return function (path, options, handler) {
@@ -19,7 +13,9 @@ async function plugin(fastify, opts) {
         handler = options
         options = {}
       }
+
       fastify[method](path, options, async function authHandler(request, reply) {
+
         async function authorization() {
           const authorization = request.cookies.authorization
           try {
@@ -28,12 +24,14 @@ async function plugin(fastify, opts) {
             return null
           }
         }
+
         if (enforce && !(await authorization())) {
           return fastify.httpErrors.unauthorized('please login')
         } else {
           return handler(request, reply, authorization)
         }
       })
+
     }
   }
 
@@ -72,7 +70,12 @@ async function plugin(fastify, opts) {
 module.exports = fp(plugin, {
   name: 'fastify-auth',
   decorators: {
-    fastify: ['crypto']
+    fastify: ['crypto'],
+    request: ['cookies'],
+    reply: ['setCookie', 'clearCookie']
   },
-  dependencies: ['fastify-crypto']
+  dependencies: [
+    'fastify-crypto',
+    'fastify-cookie'
+  ]
 })
