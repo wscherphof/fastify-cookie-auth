@@ -12,9 +12,6 @@ async function plugin(fastify, opts) {
   if (!fastify.cookies) {
     fastify.register(require('fastify-cookie'))
   }
-  if (!fastify.crypto) {
-    fastify.register(require('fastify-crypto'))
-  }
 
   function auth(method, enforce) {
     return function (path, options, handler) {
@@ -73,5 +70,9 @@ async function plugin(fastify, opts) {
 }
 
 module.exports = fp(plugin, {
-  name: 'fastify-auth'
+  name: 'fastify-auth',
+  decorators: {
+    fastify: ['crypto']
+  },
+  dependencies: ['fastify-crypto']
 })
