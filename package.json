@@ -1,0 +1,27 @@
+{
+  "name": "fastify-cookie-auth",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wscherphof/fastify-cookie-auth.git"
+  },
+  "author": "Wouter Scherphof",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/wscherphof/fastify-cookie-auth/issues"
+  },
+  "homepage": "https://github.com/wscherphof/fastify-cookie-auth#readme",
+  "dependencies": {
+    "fastify-cookie": "^5.5.0",
+    "fastify-plugin": "^3.0.0",
+    "fastify-sensible": "^3.1.2"
+  },
+  "devDependencies": {
+    "standard": "^16.0.4"
+  }
+}
