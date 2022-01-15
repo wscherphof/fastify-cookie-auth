@@ -1,10 +1,11 @@
 {
   "name": "fastify-cookie-auth",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "standard --fix"
   },
   "repository": {
     "type": "git",
@@ -21,5 +22,10 @@
   },
   "devDependencies": {
     "standard": "^16.0.4"
+  },
+  "peerDependencies": {
+    "fastify-cookie": "^5.5.0",
+    "fastify-crypto": "^0.1.0",
+    "fastify-sensible": "^3.1.0"
   }
 }

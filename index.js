@@ -5,18 +5,16 @@ const fp = require('fastify-plugin')
 // the use of fastify-plugin is required to be able
 // to export the decorators to the outer scope
 
-async function plugin(fastify, opts) {
-
-  function auth(method, enforce) {
+async function plugin (fastify, opts) {
+  function auth (method, enforce) {
     return function (path, options, handler) {
       if (typeof options === 'function') {
         handler = options
         options = {}
       }
 
-      fastify[method](path, options, async function authHandler(request, reply) {
-
-        async function authorization() {
+      fastify[method](path, options, async function authHandler (request, reply) {
+        async function authorization () {
           const authorization = request.cookies.authorization
           try {
             return await fastify.crypto.decrypt(authorization)
@@ -31,7 +29,6 @@ async function plugin(fastify, opts) {
           return handler(request, reply, authorization)
         }
       })
-
     }
   }
 
@@ -50,7 +47,7 @@ async function plugin(fastify, opts) {
     }
   })
 
-  fastify.decorateReply('signIn', async function signIn(data, options = {}) {
+  fastify.decorateReply('signIn', async function signIn (data, options = {}) {
     const defaults = {
       path: '/',
       maxAge: 60 * 60 * 24, // seconds
@@ -62,7 +59,7 @@ async function plugin(fastify, opts) {
     this.setCookie('authorization', encrypted, options)
   })
 
-  fastify.decorateReply('signOut', function signOut() {
+  fastify.decorateReply('signOut', function signOut () {
     this.clearCookie('authorization')
   })
 }
@@ -70,12 +67,13 @@ async function plugin(fastify, opts) {
 module.exports = fp(plugin, {
   name: 'fastify-auth',
   decorators: {
-    fastify: ['crypto'],
+    fastify: ['httpErrors', 'crypto'],
     request: ['cookies'],
     reply: ['setCookie', 'clearCookie']
   },
   dependencies: [
-    'fastify-crypto',
-    'fastify-cookie'
+    'fastify-sensible',
+    'fastify-cookie',
+    'fastify-crypto'
   ]
 })
