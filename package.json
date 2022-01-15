@@ -1,6 +1,6 @@
 {
   "name": "fastify-cookie-auth",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -25,7 +25,7 @@
   },
   "peerDependencies": {
     "fastify-cookie": "^5.5.0",
-    "fastify-crypto": "^0.1.0",
+    "fastify-crypto": "^0.1.1",
     "fastify-sensible": "^3.1.0"
   }
 }
