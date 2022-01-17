@@ -14,7 +14,7 @@ async function plugin (fastify, opts) {
       }
 
       fastify[method](path, options, async function authHandler (request, reply) {
-        async function authorization () {
+        async function auth () {
           const authorization = request.cookies.authorization
           try {
             return await fastify.crypto.decrypt(authorization)
@@ -23,10 +23,10 @@ async function plugin (fastify, opts) {
           }
         }
 
-        if (enforce && !(await authorization())) {
+        if (enforce && !(await auth())) {
           return fastify.httpErrors.unauthorized('please login')
         } else {
-          return handler(request, reply, authorization)
+          return handler(request, reply, auth())
         }
       })
     }
