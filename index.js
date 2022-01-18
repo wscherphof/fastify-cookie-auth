@@ -5,49 +5,46 @@ const fp = require('fastify-plugin')
 // the use of fastify-plugin is required to be able
 // to export the decorators to the outer scope
 
-async function plugin (fastify, opts) {
-  function auth (method, enforce) {
+async function plugin(fastify, opts) {
+  function handle(method) {
     return function (path, options, handler) {
       if (typeof options === 'function') {
         handler = options
         options = {}
       }
 
-      fastify[method](path, options, async function authHandler (request, reply) {
-        async function auth () {
-          const authorization = request.cookies.authorization
-          try {
-            return await fastify.crypto.decrypt(authorization)
-          } catch (error) {
-            return null
-          }
-        }
-
-        if (enforce && !(await auth())) {
+      fastify[method](path, options, async function authHandler(request, reply) {
+        if (!(await auth(request))) {
           return fastify.httpErrors.unauthorized('please login')
         } else {
-          return handler(request, reply, auth())
+          return handler(request, reply)
         }
       })
     }
   }
 
-  fastify.decorate('auth', {
-    get: auth('get', true),
-    push: auth('push', true),
-    post: auth('post', true),
-    delete: auth('delete', true),
-    patch: auth('patch', true),
-    optional: {
-      get: auth('get'),
-      push: auth('push'),
-      post: auth('post'),
-      delete: auth('delete'),
-      patch: auth('patch')
+  async function auth(request) {
+    const authorization = request.cookies.authorization
+    try {
+      return await fastify.crypto.decrypt(authorization)
+    } catch (error) {
+      return null
     }
+  }
+
+  fastify.decorate('auth', {
+    get: handle('get', true),
+    push: handle('push', true),
+    post: handle('post', true),
+    delete: handle('delete', true),
+    patch: handle('patch', true)
   })
 
-  fastify.decorateReply('signIn', async function signIn (data, options = {}) {
+  fastify.decorateRequest('auth', async function () {
+    return await auth(this)
+  })
+
+  fastify.decorateReply('signIn', async function signIn(data, options = {}) {
     const defaults = {
       path: '/',
       maxAge: 60 * 60 * 24, // seconds
@@ -59,7 +56,7 @@ async function plugin (fastify, opts) {
     this.setCookie('authorization', encrypted, options)
   })
 
-  fastify.decorateReply('signOut', function signOut () {
+  fastify.decorateReply('signOut', function signOut() {
     this.clearCookie('authorization')
   })
 }
