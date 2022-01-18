@@ -6,6 +6,16 @@ const fp = require('fastify-plugin')
 // to export the decorators to the outer scope
 
 async function plugin(fastify, opts) {
+
+  fastify.addHook('onRequest', async (request, reply) => {
+    const authorization = request.cookies.authorization
+    try {
+      request.auth = await fastify.crypto.decrypt(authorization)
+    } catch (error) {
+      request.auth = null
+    }
+  })
+
   function handle(method) {
     return function (path, options, handler) {
       if (typeof options === 'function') {
@@ -14,21 +24,12 @@ async function plugin(fastify, opts) {
       }
 
       fastify[method](path, options, async function authHandler(request, reply) {
-        if (!(await auth(request))) {
+        if (!request.auth) {
           return fastify.httpErrors.unauthorized('please login')
         } else {
           return handler(request, reply)
         }
       })
-    }
-  }
-
-  async function auth(request) {
-    const authorization = request.cookies.authorization
-    try {
-      return await fastify.crypto.decrypt(authorization)
-    } catch (error) {
-      return null
     }
   }
 
@@ -38,10 +39,6 @@ async function plugin(fastify, opts) {
     post: handle('post', true),
     delete: handle('delete', true),
     patch: handle('patch', true)
-  })
-
-  fastify.decorateRequest('auth', async function () {
-    return await auth(this)
   })
 
   fastify.decorateReply('signIn', async function signIn(data, options = {}) {
